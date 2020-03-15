@@ -8,7 +8,7 @@
  *
  * You are encouraged to use STL container types as an underlying storage mechanism for the grid cells.
  *
- * @author YOUR_STUDENT_NUMBER
+ * @author 953238
  * @date March, 2020
  */
 #include "grid.h"
@@ -291,7 +291,7 @@
  * Grid::set(x, y, value)
  *
  * Overwrites the value at the desired coordinate.
- * The function should be callable from a constant context.
+ * The function should be callable from a constant context. -> Wrong
  * Should be implemented by invoking Grid::operator()(x, y).
  *
  * @example

@@ -5,7 +5,7 @@
  * The test suites provide granular BDD style (Behaviour Driven Development) test cases
  * which will help further understand the specification you need to code to.
  *
- * @author YOUR_STUDENT_NUMBER
+ * @author 953238
  * @date March, 2020
  */
 #pragma once

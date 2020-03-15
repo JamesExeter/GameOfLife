@@ -18,7 +18,7 @@
  *                padded with zero or more 0 bits.
  *              - a 0 bit should be considered Cell::DEAD, a 1 bit should be considered Cell::ALIVE.
  *
- * @author YOUR_STUDENT_NUMBER
+ * @author 953238
  * @date March, 2020
  */
 #include "zoo.h"
@@ -73,7 +73,7 @@
 /**
  * Zoo::light_weight_spaceship()
  *
- * Construct a 3x3 grid containing a light weight spaceship.
+ * Construct a 5x4 grid containing a light weight spaceship.
  * https://www.conwaylife.com/wiki/Lightweight_spaceship
  *
  * @example

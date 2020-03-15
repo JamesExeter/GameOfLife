@@ -5,7 +5,7 @@
  * The test suites provide granular BDD style (Behaviour Driven Development) test cases
  * which will help further understand the specification you need to code to.
  *
- * @author YOUR_STUDENT_NUMBER
+ * @author 953238
  * @date March, 2020
  */
 #pragma once
@@ -28,5 +28,45 @@ class Grid {
     // How to draw an owl:
     //      Step 1. Draw a circle.
     //      Step 2. Draw the rest of the owl.
+private:
+    //Private variables and methods of the Grid class
+    unsigned int square_size;
+
+    unsigned int get_index(unsigned int x, unsigned int y);
+
+public:
+    //Public variables and methods of the Grid class
+    Grid();
+    Grid(unsigned int size);
+    Grid(unsigned int width, unsigned int height);
+    ~Grid();
+    unsigned int get_width() const;
+    unsigned int get_width();
+    unsigned int get_height() const;
+    unsigned int get_height();
+    unsigned int get_total_cells() const;
+    unsigned int get_total_cells();
+    unsigned int get_alive_cells() const;
+    unsigned int get_alive_cells();
+    unsigned int get_dead_cells() const;
+    unsigned int get_dead_cells();
+    Cell get(unsigned int x, unsigned int y) const;
+    Cell get(unsigned int x, unsigned int y);
+
+    //void set(unsigned int x, unsigned int y, Cell value) const;
+    void set(unsigned int x, unsigned int y, Cell value);
+
+    void resize(unsigned int square_size);
+    void resize(unsigned int width, unsigned int height);
+
+    Cell operator(unsigned int x, unsigned int y) const;
+    Cell operator(unsigned int x, unsigned int y);
+
+    Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1) const;
+    Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1);
+
+
+
+
 
 };
