@@ -13,6 +13,7 @@
  */
 #include "grid.h"
 #include <vector>
+#include <algorithm>
 
 // Include the minimal number of headers needed to support your implementation.
 // #include ...
@@ -127,7 +128,7 @@ unsigned int Grid::get_width() const {
  * @return
  *      The height of the grid.
  */
-unsigned Grid::get_height() const {
+unsigned int Grid::get_height() const {
     return height;
 }
 
@@ -154,7 +155,7 @@ unsigned Grid::get_height() const {
  * @return
  *      The number of total cells.
  */
-unsigned Grid::get_total_cells() const {
+unsigned int Grid::get_total_cells() const {
     return total_cells;
 }
 
@@ -181,7 +182,14 @@ unsigned Grid::get_total_cells() const {
  * @return
  *      The number of alive cells.
  */
+unsigned int Grid::get_alive_cells() const {
+    unsigned int sum = 0;
+    for(auto& v: cell_grid) {
+        sum += count( v.begin(), v.end(), Cell::ALIVE );
+    }
 
+    return sum;
+}
 
 /**
  * Grid::get_dead_cells()
@@ -206,7 +214,9 @@ unsigned Grid::get_total_cells() const {
  * @return
  *      The number of dead cells.
  */
-
+unsigned int Grid::get_dead_cells() const {
+    return total_cells - this -> get_alive_cells();
+}
 
 /**
  * Grid::resize(square_size)
@@ -528,19 +538,5 @@ unsigned Grid::get_total_cells() const {
  *
  * @return
  *      Returns a reference to the output stream to enable operator chaining.
- */
-
-
-/**
- * Grid::calc_alive_cells()
- *
- * Personal helper function that finds the number of alive cells in a 2d grid.
- * From this number you can find the number of dead cells by subtracting the result of
- * this function from the total number of cells.
- *
- * This function should be callable on a constant Grid
- *
- * @return
- *      Returns the total number of alive cells in a 2d grid instance
  */
 
