@@ -12,6 +12,7 @@
  * @date March, 2020
  */
 #include "grid.h"
+#include <vector>
 
 // Include the minimal number of headers needed to support your implementation.
 // #include ...
@@ -28,7 +29,7 @@
  *      Grid grid;
  *
  */
-
+Grid::Grid() : width(0), height(0), total_cells(0), cell_grid(std::vector<std::vector<Cell>>()){}
 
 /**
  * Grid::Grid(square_size)
@@ -54,6 +55,8 @@
  *      The edge size to use for the width and height of the grid.
  */
 
+Grid::Grid(const unsigned int square_size) : width(square_size), height(square_size), total_cells(square_size*square_size),
+                                             cell_grid(std::vector<std::vector<Cell>>(square_size, std::vector<Cell>(square_size, Cell::DEAD))){}
 
 /**
  * Grid::Grid(width, height)
@@ -71,7 +74,8 @@
  * @param height
  *      The height of the grid.
  */
-
+Grid::Grid(const unsigned int width, const unsigned int height) : width(width), height(height), total_cells(width * height),
+                                                                  cell_grid(std::vector<std::vector<Cell>>(width, std::vector<Cell>(height, Cell::DEAD))){}
 
 /**
  * Grid::get_width()
@@ -96,7 +100,9 @@
  * @return
  *      The width of the grid.
  */
-
+unsigned int Grid::get_width() const {
+    return width;
+}
 
 /**
  * Grid::get_height()
@@ -121,7 +127,9 @@
  * @return
  *      The height of the grid.
  */
-
+unsigned Grid::get_height() const {
+    return height;
+}
 
 /**
  * Grid::get_total_cells()
@@ -146,7 +154,9 @@
  * @return
  *      The number of total cells.
  */
-
+unsigned Grid::get_total_cells() const {
+    return total_cells;
+}
 
 /**
  * Grid::get_alive_cells()
@@ -257,6 +267,7 @@
  */
 
 
+
 /**
  * Grid::get(x, y)
  *
@@ -291,7 +302,6 @@
  * Grid::set(x, y, value)
  *
  * Overwrites the value at the desired coordinate.
- * The function should be callable from a constant context. -> Wrong
  * Should be implemented by invoking Grid::operator()(x, y).
  *
  * @example
@@ -518,5 +528,19 @@
  *
  * @return
  *      Returns a reference to the output stream to enable operator chaining.
+ */
+
+
+/**
+ * Grid::calc_alive_cells()
+ *
+ * Personal helper function that finds the number of alive cells in a 2d grid.
+ * From this number you can find the number of dead cells by subtracting the result of
+ * this function from the total number of cells.
+ *
+ * This function should be callable on a constant Grid
+ *
+ * @return
+ *      Returns the total number of alive cells in a 2d grid instance
  */
 

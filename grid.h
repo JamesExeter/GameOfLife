@@ -11,7 +11,8 @@
 #pragma once
 
 // Add the minimal number of includes you need in order to declare the class.
-// #include ...
+#include <vector>
+
 
 /**
  * A Cell is a char limited to two named values for Cell::DEAD and Cell::ALIVE.
@@ -25,13 +26,14 @@ enum Cell : char {
  * Declare the structure of the Grid class for representing a 2d grid of cells.
  */
 class Grid {
-    // How to draw an owl:
-    //      Step 1. Draw a circle.
-    //      Step 2. Draw the rest of the owl.
 private:
     //Private variables and methods of the Grid class
-    unsigned int square_size;
+    unsigned int width;
+    unsigned int height;
+    unsigned int total_cells;
+    std::vector<std::vector<Cell> > cell_grid;
 
+    unsigned int calc_alive_cells();
     unsigned int get_index(unsigned int x, unsigned int y);
 
 public:
@@ -59,14 +61,17 @@ public:
     void resize(unsigned int square_size);
     void resize(unsigned int width, unsigned int height);
 
-    Cell operator(unsigned int x, unsigned int y) const;
-    Cell operator(unsigned int x, unsigned int y);
+    Cell operator()(unsigned int x, unsigned int y) const;
+    Cell operator()(unsigned int x, unsigned int y);
 
     Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1) const;
     Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1);
 
+    // Merge
 
+    // Rotate
 
+    // operator <<
 
 
 };
