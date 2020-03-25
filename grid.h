@@ -31,10 +31,9 @@ private:
     unsigned int width;
     unsigned int height;
     unsigned int total_cells;
-    std::vector<std::vector<Cell> > cell_grid;
+    std::vector<Cell> cell_grid;
 
-
-    unsigned int get_index(unsigned int x, unsigned int y);
+    unsigned int get_index(unsigned int x, unsigned int y) const;
 
 public:
     //Public variables and methods of the Grid class
@@ -46,16 +45,15 @@ public:
     unsigned int get_total_cells() const;
     unsigned int get_alive_cells() const;
     unsigned int get_dead_cells() const;
-    Cell get(unsigned int x, unsigned int y) const;
 
-    //void set(unsigned int x, unsigned int y, Cell value) const;
+    Cell get(unsigned int x, unsigned int y) const;
     void set(unsigned int x, unsigned int y, Cell value);
 
     void resize(unsigned int square_size);
     void resize(unsigned int width, unsigned int height);
 
-    Cell operator()(unsigned int x, unsigned int y) const;
-    Cell operator()(unsigned int x, unsigned int y);
+    Cell& operator()(unsigned int x, unsigned int y);
+    const Cell& operator()(unsigned int x, unsigned int y) const;
 
     Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1) const;
     Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1);
