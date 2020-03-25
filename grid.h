@@ -33,12 +33,13 @@ private:
     unsigned int total_cells;
     std::vector<std::vector<Cell> > cell_grid;
 
+
     unsigned int get_index(unsigned int x, unsigned int y);
 
 public:
     //Public variables and methods of the Grid class
     Grid();
-    Grid(unsigned int size);
+    explicit Grid(unsigned int size);
     Grid(unsigned int width, unsigned int height);
     unsigned int get_width() const;
     unsigned int get_height() const;
@@ -46,7 +47,6 @@ public:
     unsigned int get_alive_cells() const;
     unsigned int get_dead_cells() const;
     Cell get(unsigned int x, unsigned int y) const;
-    Cell get(unsigned int x, unsigned int y);
 
     //void set(unsigned int x, unsigned int y, Cell value) const;
     void set(unsigned int x, unsigned int y, Cell value);

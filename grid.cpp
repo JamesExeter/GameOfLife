@@ -235,7 +235,12 @@ unsigned int Grid::get_dead_cells() const {
  * @param square_size
  *      The new edge size for both the width and height of the grid.
  */
-
+void Grid::resize(const unsigned int square_size) {
+    cell_grid.resize(square_size, std::vector<Cell>(square_size, Cell::DEAD));
+    this -> width = square_size;
+    this -> height = square_size;
+    this -> total_cells = square_size * square_size;
+}
 
 /**
  * Grid::resize(width, height)
@@ -257,6 +262,12 @@ unsigned int Grid::get_dead_cells() const {
  * @param new_height
  *      The new height for the grid.
  */
+ void Grid::resize(const unsigned int _width, unsigned int const _height) {
+     cell_grid.resize(_width, std::vector<Cell>(_height, Cell::DEAD));
+     this -> width = _width;
+     this -> height = _height;
+     this -> total_cells = width * height;
+ }
 
 
 /**
