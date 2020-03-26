@@ -12,6 +12,7 @@
 
 // Add the minimal number of includes you need in order to declare the class.
 #include <vector>
+#include <iostream>
 
 
 /**
@@ -49,8 +50,10 @@ public:
     Cell get(unsigned int x, unsigned int y) const;
     void set(unsigned int x, unsigned int y, Cell value);
 
-    void resize(unsigned int square_size);
-    void resize(unsigned int width, unsigned int height);
+    void resize(unsigned int new_square_size);
+    void resize(unsigned int new_width, unsigned int new_height);
+
+    std::vector<Cell> map_2D(const std::vector<Cell> &grid_1D, unsigned int new_width, unsigned int new_height);
 
     Cell& operator()(unsigned int x, unsigned int y);
     const Cell& operator()(unsigned int x, unsigned int y) const;
@@ -64,5 +67,6 @@ public:
 
     // operator <<
 
-
+    void test_print(const std::vector<Cell> &test_1d);
+    void test_print(const std::vector<std::vector<Cell>> &test_2d);
 };

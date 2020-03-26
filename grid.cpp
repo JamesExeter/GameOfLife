@@ -233,11 +233,11 @@ unsigned int Grid::get_dead_cells() const {
  * @param square_size
  *      The new edge size for both the width and height of the grid.
  */
-void Grid::resize(const unsigned int square_size) {
-    this -> cell_grid.resize(square_size * square_size, Cell::DEAD);
-    this -> width = square_size;
-    this -> height = square_size;
-    this -> total_cells = square_size * square_size;
+void Grid::resize(const unsigned int new_square_size) {
+    this -> cell_grid = map_2D(cell_grid, new_square_size, new_square_size);
+    this -> width = new_square_size;
+    this -> height = new_square_size;
+    this -> total_cells = width * height;
 }
 
 /**
@@ -260,12 +260,55 @@ void Grid::resize(const unsigned int square_size) {
  * @param new_height
  *      The new height for the grid.
  */
- void Grid::resize(const unsigned int _width, unsigned int const _height) {
-     this -> cell_grid.resize(_width * _height, Cell::DEAD);
-     this -> width = _width;
-     this -> height = _height;
+ void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
+     this -> cell_grid = map_2D(cell_grid, new_width, new_height);
+     this -> width = new_width;
+     this -> height = new_height;
      this -> total_cells = width * height;
  }
+
+ /**
+  * Grid:map_2D(grid_1D, new_width, new_height)
+  *
+  * Private helper function that resizes a 1D vector to a new width and height
+  * It converts the 1D array to a 2D array of the new size such that the resizing
+  * Has respect to the 2D dimensions of the cell grid.
+  *
+  * @param grid_1D
+  *     The 1D grid holding the cells of the current grid instance
+  *
+  * @param new_width
+  *     The new width that the grid is to be resized to
+  *
+  * @param new_height
+  *     The new height that the grid is to be resized to
+  *
+  * @return
+  *     The 1D representation of the resized cell grid
+  */
+std::vector<Cell> Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int new_width, const unsigned int new_height) {
+    std::vector<Cell> out_1D(new_width*new_height);
+    std::vector<std::vector<Cell>> map_2D (height, std::vector<Cell>(width, Cell::DEAD));
+
+    for (unsigned int i = 0; i < height; i++){
+        for (unsigned int j = 0; j < width; j++){
+            map_2D[i][j] = grid_1D[width*i + j];
+        }
+    }
+
+    map_2D.resize(new_height);
+    for (unsigned int i = 0; i < new_height; i++){
+        map_2D[i].resize(new_width, Cell::DEAD);
+    }
+
+    for (unsigned int i = 0; i < new_height; i++){
+        for (unsigned int j = 0; j < new_width; j++){
+            out_1D[j + new_width * i] = map_2D[i][j];
+        }
+    }
+
+    return out_1D;
+}
 
 /**
  * Grid::get_index(x, y)
@@ -317,7 +360,6 @@ unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
  */
 Cell Grid::get(const unsigned int x, const unsigned int y) const {
     try {
-        std::cout << operator()(x, y) << std::endl;
         return operator()(x, y);
     }
     catch (const std::out_of_range& oor) {
@@ -576,3 +618,29 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      Returns a reference to the output stream to enable operator chaining.
  */
 
+
+/*
+ * Tester function used to print the 1D coordinates for confirmation in tests
+ */
+void Grid::test_print(const std::vector<Cell> &test_1d) {
+    std::cout << "The vector elements are: ";
+
+    for(auto & i : test_1d) {
+        std::cout << i << ' ';
+    }
+
+    std::cout << "\n" << test_1d.size() << std::endl;
+}
+
+void Grid::test_print(const std::vector<std::vector<Cell>> &test_2d) {
+    std::cout << "The vector elements are: " << std::endl;
+
+    for ( const std::vector<Cell> &v : test_2d){
+        for ( Cell x : v ) {
+            std::cout << x << ' ';
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << "\n" << test_2d.size()*test_2d[0].size() << std::endl;
+}
