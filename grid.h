@@ -64,10 +64,8 @@ public:
     void merge(Grid other, unsigned int x0, unsigned int y0, bool alive_only = false);
 
     // Rotate
+    Grid rotate(int _rotation);
 
     friend std::ostream& operator<<(std::ostream& os, const Grid &grid);
-
-    void test_print(const std::vector<Cell> &test_1d);
-    void test_print(const std::vector<std::vector<Cell>> &test_2d);
 };
 

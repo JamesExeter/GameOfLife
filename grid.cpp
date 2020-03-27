@@ -547,7 +547,6 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
     return *this;
  }
 
-
 /**
  * Grid::merge(other, x0, y0, alive_only = false)
  *
