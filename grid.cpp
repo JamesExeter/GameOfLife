@@ -234,10 +234,7 @@ unsigned int Grid::get_dead_cells() const {
  *      The new edge size for both the width and height of the grid.
  */
 void Grid::resize(const unsigned int new_square_size) {
-    this -> cell_grid = map_2D(cell_grid, new_square_size, new_square_size);
-    this -> width = new_square_size;
-    this -> height = new_square_size;
-    this -> total_cells = width * height;
+    Grid::resize(new_square_size, new_square_size);
 }
 
 /**
@@ -260,8 +257,23 @@ void Grid::resize(const unsigned int new_square_size) {
  * @param new_height
  *      The new height for the grid.
  */
+
  void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
-     this -> cell_grid = map_2D(cell_grid, new_width, new_height);
+     std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, new_width, new_width);
+
+     map2D.resize(new_height);
+     for (unsigned int i = 0; i < new_height; i++){
+         map2D[i].resize(new_width, Cell::DEAD);
+     }
+
+     this -> cell_grid.resize(new_width*new_height);
+
+     for (unsigned int i = 0; i < new_height; i++){
+         for (unsigned int j = 0; j < new_width; j++){
+             this -> cell_grid[j + new_width * i] = map2D[i][j];
+         }
+     }
+
      this -> width = new_width;
      this -> height = new_height;
      this -> total_cells = width * height;
@@ -270,9 +282,7 @@ void Grid::resize(const unsigned int new_square_size) {
  /**
   * Grid:map_2D(grid_1D, new_width, new_height)
   *
-  * Private helper function that resizes a 1D vector to a new width and height
-  * It converts the 1D array to a 2D array of the new size such that the resizing
-  * Has respect to the 2D dimensions of the cell grid.
+  * Private helper function that converts a 1D vector to a 2D vector of the same dimensions.
   *
   * @param grid_1D
   *     The 1D grid holding the cells of the current grid instance
@@ -284,30 +294,20 @@ void Grid::resize(const unsigned int new_square_size) {
   *     The new height that the grid is to be resized to
   *
   * @return
-  *     The 1D representation of the resized cell grid
+  *     The 2D representation of the original cell grid
   */
-std::vector<Cell> Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int new_width, const unsigned int new_height) {
+
+std::vector<std::vector<Cell>> Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int new_width, const unsigned int new_height) {
     std::vector<Cell> out_1D(new_width*new_height);
-    std::vector<std::vector<Cell>> map_2D (height, std::vector<Cell>(width, Cell::DEAD));
+    std::vector<std::vector<Cell>> map2D (height, std::vector<Cell>(width, Cell::DEAD));
 
     for (unsigned int i = 0; i < height; i++){
         for (unsigned int j = 0; j < width; j++){
-            map_2D[i][j] = grid_1D[width*i + j];
+            map2D[i][j] = grid_1D[width*i + j];
         }
     }
 
-    map_2D.resize(new_height);
-    for (unsigned int i = 0; i < new_height; i++){
-        map_2D[i].resize(new_width, Cell::DEAD);
-    }
-
-    for (unsigned int i = 0; i < new_height; i++){
-        for (unsigned int j = 0; j < new_width; j++){
-            out_1D[j + new_width * i] = map_2D[i][j];
-        }
-    }
-
-    return out_1D;
+    return map2D;
 }
 
 /**
@@ -359,13 +359,10 @@ unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
  *      std::exception or sub-class if x,y is not a valid coordinate within the grid.
  */
 Cell Grid::get(const unsigned int x, const unsigned int y) const {
-    try {
-        if (check_range(x, 0, width) && check_range(y, 0, height)) {
-            return operator()(x, y);
-        }
-        throw std::out_of_range("Oops\n");
+    try{
+        return operator()(x, y);
     } catch (const std::out_of_range& oor) {
-        std::cerr << "Out of Range error for those coordinates: " << oor.what() << std::endl;
+        std::cerr << "Out of Range error for those coordinates " << oor.what() << std::endl;
     }
 }
 
@@ -397,12 +394,9 @@ Cell Grid::get(const unsigned int x, const unsigned int y) const {
  */
 void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
     try {
-        if (check_range(x, 0, width) && check_range(y, 0, height)) {
-            this->operator()(x, y) = value;
-        }
-        throw std::out_of_range("Oops\n");
+        this->operator()(x, y) = value;
     } catch (const std::out_of_range& oor) {
-        std::cerr << "Out of Range error for those coordinates: " << oor.what() << '\n';
+        std::cerr << "Out of Range error for those coordinates " << oor.what() << '\n';
     }
 }
 
@@ -443,10 +437,7 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  */
  Cell& Grid::operator()(unsigned int x, unsigned int y) {
      try {
-         if (check_range(x, 0, width) && check_range(y, 0, height)) {
-             return cell_grid[get_index(x, y)];
-         }
-         throw std::out_of_range("Oops\n");
+         return cell_grid[get_index(x, y)];
      } catch (const std::out_of_range& oor) {
          std::cout << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
      }
@@ -484,10 +475,7 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  */
 const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
     try {
-        if (check_range(x, 0, width) && check_range(y, 0, height)) {
-            return cell_grid[get_index(x, y)];
-        }
-        throw std::out_of_range("Oops\n");
+        return cell_grid[get_index(x, y)];
     } catch (const std::out_of_range& oor) {
         std::cout << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
     }
@@ -532,6 +520,9 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
          if ((x0 <= x1) && (y0 <= y1)){
              try {
                  if (check_range(x0, 0, width) && check_range(x0, 0, width) && check_range(y0, 0, height) && check_range(y1, 0, height)){
+                     unsigned int new_width = x1 - x0;
+                     unsigned int new_height = y1 - y0;
+                     Grid sub_grid(new_width, new_height);
 
                  }
                  throw std::out_of_range("One of more values not in range\n");
@@ -647,25 +638,6 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  * @return
  *      Returns a reference to the output stream to enable operator chaining.
  */
-
-/**
- * Grid::check_range(to_check, low, high)
- * Private helper function to determine whether a value provided is between
- * the range of two numbers inclusively. Primarily used to error check
- * for out of range exceptions.
- *
- * @param to_check
- *      The number that is to be checked for being in range
- * @param low
- *      The lowest value in the checked range
- * @param high
- *      The highest value in the checked range
- * @return
- *      Returns a boolean value stating whether the value is in range or not
- */
- bool Grid::check_range(unsigned int to_check, unsigned int low, unsigned int high) const {
-    return low <= to_check < high;
-}
 
 
 /*
