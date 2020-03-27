@@ -392,7 +392,7 @@ Cell Grid::get(const unsigned int x, const unsigned int y) const {
  */
 void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
     try {
-        operator()(x, y) = value;
+        this -> operator()(x, y) = value;
     } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates " << oor.what() << '\n';
     }
@@ -514,13 +514,11 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      or if the crop window has a negative size.
  */
  Grid Grid::crop(const unsigned int x0, const unsigned int y0, const unsigned int x1, const unsigned int y1) const {
-     std::cout << x0 << " " << y0 << " " << x1 << " " << y1 << std::endl;
      try {
          if ((x0 <= x1) && (y0 <= y1)){
-             if ((0 <= x0 && x0 <= width) && (0 <= x1 && x1 <= width) && (0 <= y0 && y0 <= height) && (0 <= y1 && y1 <= height)){
-                 unsigned int new_width = x1 - x0;
-                 unsigned int new_height = y1 - y0;
-                 Grid sub_grid(new_width, new_height);
+             if ((0 <= x0 && x0 <= width) && (x0 <= x1 && x1 <= width) &&
+                 (0 <= y0 && y0 <= height) && (y0 <= y1 && y1 <= height)){
+                 Grid sub_grid((x1-x0), (y1-y0));
 
                  std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, width, height);
 
@@ -529,6 +527,8 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
                          sub_grid.set(j, i, map2D[i][j]);
                      }
                  }
+
+                 std::cout << sub_grid;
 
                  return sub_grid;
              }
