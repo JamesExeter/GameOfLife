@@ -53,7 +53,7 @@ public:
     void resize(unsigned int new_square_size);
     void resize(unsigned int new_width, unsigned int new_height);
 
-    std::vector<std::vector<Cell>> map_2D(const std::vector<Cell> &grid_1D, unsigned int new_width, unsigned int new_height);
+    std::vector<std::vector<Cell>> map_2D(const std::vector<Cell> &grid_1D, unsigned int w, unsigned int h) const;
 
     Cell& operator()(unsigned int x, unsigned int y);
     const Cell& operator()(unsigned int x, unsigned int y) const;
@@ -65,8 +65,9 @@ public:
 
     // Rotate
 
-    // operator <<
+    friend std::ostream& operator<<(std::ostream& os, const Grid &grid);
 
     void test_print(const std::vector<Cell> &test_1d);
     void test_print(const std::vector<std::vector<Cell>> &test_2d);
 };
+

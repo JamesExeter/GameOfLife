@@ -259,24 +259,23 @@ void Grid::resize(const unsigned int new_square_size) {
  */
 
  void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
-     std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, new_width, new_width);
+     std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, width, height);
 
      map2D.resize(new_height);
      for (unsigned int i = 0; i < new_height; i++){
          map2D[i].resize(new_width, Cell::DEAD);
      }
 
-     this -> cell_grid.resize(new_width*new_height);
-
-     for (unsigned int i = 0; i < new_height; i++){
-         for (unsigned int j = 0; j < new_width; j++){
-             this -> cell_grid[j + new_width * i] = map2D[i][j];
-         }
-     }
-
+     this -> cell_grid.resize(new_width*new_height, Cell::DEAD);
      this -> width = new_width;
      this -> height = new_height;
      this -> total_cells = width * height;
+
+     for (unsigned int i = 0; i < new_height; i++){
+         for (unsigned int j = 0; j < new_width; j++){
+             this -> set(j, i, map2D[i][j]);
+         }
+     }
  }
 
  /**
@@ -297,13 +296,12 @@ void Grid::resize(const unsigned int new_square_size) {
   *     The 2D representation of the original cell grid
   */
 
-std::vector<std::vector<Cell>> Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int new_width, const unsigned int new_height) {
-    std::vector<Cell> out_1D(new_width*new_height);
-    std::vector<std::vector<Cell>> map2D (height, std::vector<Cell>(width, Cell::DEAD));
+std::vector<std::vector<Cell>> Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int w, const unsigned int h) const {
+    std::vector<std::vector<Cell>> map2D (h, std::vector<Cell>(w, Cell::DEAD));
 
-    for (unsigned int i = 0; i < height; i++){
-        for (unsigned int j = 0; j < width; j++){
-            map2D[i][j] = grid_1D[width*i + j];
+    for (unsigned int i = 0; i < h; i++){
+        for (unsigned int j = 0; j < w; j++){
+            map2D[i][j] = grid_1D[w*i + j];
         }
     }
 
@@ -394,7 +392,7 @@ Cell Grid::get(const unsigned int x, const unsigned int y) const {
  */
 void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
     try {
-        this->operator()(x, y) = value;
+        operator()(x, y) = value;
     } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates " << oor.what() << '\n';
     }
@@ -439,7 +437,7 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
      try {
          return cell_grid[get_index(x, y)];
      } catch (const std::out_of_range& oor) {
-         std::cout << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
+         std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
      }
  }
 
@@ -477,7 +475,7 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
     try {
         return cell_grid[get_index(x, y)];
     } catch (const std::out_of_range& oor) {
-        std::cout << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
+        std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
     }
 }
 
@@ -515,24 +513,34 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      std::exception or sub-class if x0,y0 or x1,y1 are not valid coordinates within the grid
  *      or if the crop window has a negative size.
  */
- Grid Grid::crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1) const {
+ Grid Grid::crop(const unsigned int x0, const unsigned int y0, const unsigned int x1, const unsigned int y1) const {
+     std::cout << x0 << " " << y0 << " " << x1 << " " << y1 << std::endl;
      try {
          if ((x0 <= x1) && (y0 <= y1)){
-             try {
-                 if (check_range(x0, 0, width) && check_range(x0, 0, width) && check_range(y0, 0, height) && check_range(y1, 0, height)){
-                     unsigned int new_width = x1 - x0;
-                     unsigned int new_height = y1 - y0;
-                     Grid sub_grid(new_width, new_height);
+             if ((0 <= x0 && x0 <= width) && (0 <= x1 && x1 <= width) && (0 <= y0 && y0 <= height) && (0 <= y1 && y1 <= height)){
+                 unsigned int new_width = x1 - x0;
+                 unsigned int new_height = y1 - y0;
+                 Grid sub_grid(new_width, new_height);
 
+                 std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, width, height);
+
+                 for (unsigned int i = y0; i < y1; i++){
+                     for (unsigned int j = x0; j < x1; j++){
+                         sub_grid.set(j, i, map2D[i][j]);
+                     }
                  }
-                 throw std::out_of_range("One of more values not in range\n");
-             } catch(const std::out_of_range& oor) {
-                 std::cout << "Out of range error thrown, at least one of (x0, y0), (x1, y1) is not a valid grid coordinate " << oor.what() << std::endl;
+
+                 return sub_grid;
              }
+             throw std::out_of_range("One of more values not in range\n");
          }
          throw std::logic_error("Cropped grid window size is invalid : logical error");
-     } catch (const std::logic_error& le){
-         std::cout << "Logic error thrown, the window size is negative " << le.what() << std::endl;
+     }
+     catch(const std::out_of_range& oor) {
+         std::cerr << "Out of range error thrown, at least one of (x0, y0), (x1, y1) is not a valid grid coordinate " << oor.what() << std::endl;
+     }
+     catch (const std::logic_error& le){
+         std::cerr << "Logic error thrown, the window size is negative " << le.what() << std::endl;
      }
 
     std::cout << "Returning the original grid " << std::endl;
@@ -638,30 +646,33 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  * @return
  *      Returns a reference to the output stream to enable operator chaining.
  */
-
-
-/*
- * Tester function used to print the 1D coordinates for confirmation in tests
- */
-void Grid::test_print(const std::vector<Cell> &test_1d) {
-    std::cout << "The vector elements are: ";
-
-    for(auto & i : test_1d) {
-        std::cout << i << ' ';
-    }
-
-    std::cout << "\n" << test_1d.size() << std::endl;
-}
-
-void Grid::test_print(const std::vector<std::vector<Cell>> &test_2d) {
-    std::cout << "The vector elements are: " << std::endl;
-
-    for ( const std::vector<Cell> &v : test_2d){
-        for ( Cell x : v ) {
-            std::cout << x << ' ';
+std::ostream& operator<<(std::ostream& os, const Grid &grid){
+    for(unsigned int  i=0; i< grid.get_height()+2; i++) {
+        for (unsigned int j = 0; j < grid.get_width() + 2; j++) {
+            if ((i == 0) || i == grid.get_height() + 1) {
+                if (j == 0) {
+                    os << "+";
+                } else if (j == grid.get_width() + 1) {
+                    os << "+" << std::endl;
+                } else {
+                    os << "-";
+                }
+            } else {
+                if (j == 0){
+                    os << "|";
+                } else if (j == grid.get_width() + 1){
+                    os << "|" << std::endl;
+                } else {
+                    if (grid.operator()(j - 1, i - 1) == Cell::ALIVE){
+                        os << "#";
+                    } else {
+                        os << " ";
+                    }
+                }
+            }
         }
-        std::cout << std::endl;
     }
 
-    std::cout << "\n" << test_2d.size()*test_2d[0].size() << std::endl;
+    return os;
 }
+
