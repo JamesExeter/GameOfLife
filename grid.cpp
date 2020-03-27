@@ -360,9 +360,11 @@ unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
  */
 Cell Grid::get(const unsigned int x, const unsigned int y) const {
     try {
-        return operator()(x, y);
-    }
-    catch (const std::out_of_range& oor) {
+        if (check_range(x, 0, width) && check_range(y, 0, height)) {
+            return operator()(x, y);
+        }
+        throw std::out_of_range("Oops\n");
+    } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates: " << oor.what() << std::endl;
     }
 }
@@ -395,9 +397,11 @@ Cell Grid::get(const unsigned int x, const unsigned int y) const {
  */
 void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
     try {
-        this->operator()(x, y) = value;
-    }
-    catch (const std::out_of_range& oor) {
+        if (check_range(x, 0, width) && check_range(y, 0, height)) {
+            this->operator()(x, y) = value;
+        }
+        throw std::out_of_range("Oops\n");
+    } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates: " << oor.what() << '\n';
     }
 }
@@ -439,7 +443,10 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  */
  Cell& Grid::operator()(unsigned int x, unsigned int y) {
      try {
-         return cell_grid[get_index(x, y)];
+         if (check_range(x, 0, width) && check_range(y, 0, height)) {
+             return cell_grid[get_index(x, y)];
+         }
+         throw std::out_of_range("Oops\n");
      } catch (const std::out_of_range& oor) {
          std::cout << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
      }
@@ -477,9 +484,12 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  */
 const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
     try {
-        return cell_grid[get_index(x, y)];
-    } catch (const std::runtime_error& rte) {
-        std::cout << "Run-time error thrown, (x, y) is not a valid grid coordinate " << rte.what() << std::endl;
+        if (check_range(x, 0, width) && check_range(y, 0, height)) {
+            return cell_grid[get_index(x, y)];
+        }
+        throw std::out_of_range("Oops\n");
+    } catch (const std::out_of_range& oor) {
+        std::cout << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
     }
 }
 
@@ -517,6 +527,26 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      std::exception or sub-class if x0,y0 or x1,y1 are not valid coordinates within the grid
  *      or if the crop window has a negative size.
  */
+ Grid Grid::crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1) const {
+     try {
+         if ((x0 <= x1) && (y0 <= y1)){
+             try {
+                 if (check_range(x0, 0, width) && check_range(x0, 0, width) && check_range(y0, 0, height) && check_range(y1, 0, height)){
+
+                 }
+                 throw std::out_of_range("One of more values not in range\n");
+             } catch(const std::out_of_range& oor) {
+                 std::cout << "Out of range error thrown, at least one of (x0, y0), (x1, y1) is not a valid grid coordinate " << oor.what() << std::endl;
+             }
+         }
+         throw std::logic_error("Cropped grid window size is invalid : logical error");
+     } catch (const std::logic_error& le){
+         std::cout << "Logic error thrown, the window size is negative " << le.what() << std::endl;
+     }
+
+    std::cout << "Returning the original grid " << std::endl;
+    return *this;
+ }
 
 
 /**
@@ -617,6 +647,25 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  * @return
  *      Returns a reference to the output stream to enable operator chaining.
  */
+
+/**
+ * Grid::check_range(to_check, low, high)
+ * Private helper function to determine whether a value provided is between
+ * the range of two numbers inclusively. Primarily used to error check
+ * for out of range exceptions.
+ *
+ * @param to_check
+ *      The number that is to be checked for being in range
+ * @param low
+ *      The lowest value in the checked range
+ * @param high
+ *      The highest value in the checked range
+ * @return
+ *      Returns a boolean value stating whether the value is in range or not
+ */
+ bool Grid::check_range(unsigned int to_check, unsigned int low, unsigned int high) const {
+    return low <= to_check < high;
+}
 
 
 /*

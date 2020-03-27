@@ -59,13 +59,15 @@ public:
     const Cell& operator()(unsigned int x, unsigned int y) const;
 
     Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1) const;
-    Grid crop(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1);
 
     // Merge
+    void merge(Grid other, unsigned int x0, unsigned int y0, bool alive_only = false);
 
     // Rotate
 
     // operator <<
+
+    bool check_range(unsigned int to_check, unsigned int low, unsigned int high) const;
 
     void test_print(const std::vector<Cell> &test_1d);
     void test_print(const std::vector<std::vector<Cell>> &test_2d);
