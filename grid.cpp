@@ -259,7 +259,7 @@ void Grid::resize(const unsigned int new_square_size) {
  */
 
  void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
-     std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, width, height);
+     std::vector<std::vector<Cell> > map2D = map_2D(cell_grid, width, height);
 
      map2D.resize(new_height);
      for (unsigned int i = 0; i < new_height; i++){
@@ -296,8 +296,8 @@ void Grid::resize(const unsigned int new_square_size) {
   *     The 2D representation of the original cell grid
   */
 
-std::vector<std::vector<Cell>> Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int w, const unsigned int h) const {
-    std::vector<std::vector<Cell>> map2D (h, std::vector<Cell>(w, Cell::DEAD));
+std::vector<std::vector<Cell> > Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int w, const unsigned int h) const {
+    std::vector<std::vector<Cell> > map2D (h, std::vector<Cell>(w, Cell::DEAD));
 
     for (unsigned int i = 0; i < h; i++){
         for (unsigned int j = 0; j < w; j++){
@@ -518,17 +518,21 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
          if ((x0 <= x1) && (y0 <= y1)){
              if ((0 <= x0 && x0 <= width) && (x0 <= x1 && x1 <= width) &&
                  (0 <= y0 && y0 <= height) && (y0 <= y1 && y1 <= height)){
+
                  Grid sub_grid((x1-x0), (y1-y0));
 
-                 std::vector<std::vector<Cell>> map2D = map_2D(cell_grid, width, height);
+                 std::vector<std::vector<Cell> > map2D = map_2D(cell_grid, width, height);
+                 std::vector<std::vector<Cell> > cropped2D;
 
                  for (unsigned int i = y0; i < y1; i++){
-                     for (unsigned int j = x0; j < x1; j++){
-                         sub_grid.set(j, i, map2D[i][j]);
-                     }
+                     cropped2D.emplace_back(map2D[i].begin() + x0, map2D[i].begin() + x1);
                  }
 
-                 std::cout << sub_grid;
+                 for (unsigned int i = 0; i < sub_grid.get_height(); i++){
+                     for (unsigned int j = 0; j < sub_grid.get_width(); j++){
+                         sub_grid.set(j, i, cropped2D[i][j]);
+                     }
+                 }
 
                  return sub_grid;
              }
@@ -608,6 +612,32 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  * @return
  *      Returns a copy of the grid that has been rotated.
  */
+ Grid Grid::rotate(int _rotation) const {
+     Grid to_rotate = *this;
+     //Need to check for backwards rotations too,
+     //Backwards basically means invert, so 90 = 270 and vice versa
+
+     if (_rotation % 4 == 0){
+         //No rotation
+         return to_rotate;
+     } else if ((_rotation - 1) % 4 == 0){
+         //Rotating 90 degrees
+         /*for (unsigned int i = 0; i < to_rotate.get_height(); i++){
+             for (unsigned int j = 0; j < to_rotate.get_width(); j++){
+
+             }
+         }*/
+
+     } else if ((_rotation - 2) % 4 == 0){
+         //Rotating 180 degrees, simply reverse the vector
+         to_rotate.cell_grid = this -> cell_grid;
+         std::reverse(to_rotate.cell_grid.begin(), to_rotate.cell_grid.end());
+         return to_rotate;
+     } else {
+         //Rotating -90 degrees / 270 degrees
+
+     }
+ }
 
 
 /**
