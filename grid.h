@@ -39,7 +39,7 @@ private:
 public:
     //Public variables and methods of the Grid class
     Grid();
-    explicit Grid(unsigned int size);
+    explicit Grid(unsigned int square_size);
     Grid(unsigned int width, unsigned int height);
     unsigned int get_width() const;
     unsigned int get_height() const;

@@ -58,7 +58,9 @@ Grid::Grid() : width(0), height(0), total_cells(0), cell_grid(std::vector<Cell>(
  *      The edge size to use for the width and height of the grid.
  */
 
-Grid::Grid(const unsigned int square_size) : width(square_size), height(square_size), total_cells(square_size*square_size),
+Grid::Grid(const unsigned int square_size) : width(square_size),
+                                             height(square_size),
+                                             total_cells(square_size*square_size),
                                              cell_grid(std::vector<Cell>(square_size * square_size, Cell::DEAD)){}
 
 /**
@@ -77,7 +79,9 @@ Grid::Grid(const unsigned int square_size) : width(square_size), height(square_s
  * @param height
  *      The height of the grid.
  */
-Grid::Grid(const unsigned int width, const unsigned int height) : width(width), height(height), total_cells(width * height),
+Grid::Grid(const unsigned int width, const unsigned int height) : width(width),
+                                                                  height(height),
+                                                                  total_cells(width * height),
                                                                   cell_grid(std::vector<Cell>(width*height, Cell::DEAD)){}
 
 /**
@@ -185,7 +189,7 @@ unsigned int Grid::get_total_cells() const {
  *      The number of alive cells.
  */
 unsigned int Grid::get_alive_cells() const {
-    unsigned int alive_count = std::count( this->cell_grid.begin(), this->cell_grid.end(), Cell::ALIVE );
+    unsigned int alive_count = std::count( this->cell_grid.begin(), this->cell_grid.end(), Cell::ALIVE);
     return alive_count;
 }
 

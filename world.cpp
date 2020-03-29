@@ -37,7 +37,7 @@
  *      World world;
  *
  */
-
+World::World() : current_grid(Grid()), next_grid(current_grid){}
 
 /**
  * World::World(square_size)
@@ -58,7 +58,8 @@
  * @param square_size
  *      The edge size to use for the width and height of the world.
  */
-
+World::World(const unsigned int square_size) : current_grid(Grid(square_size)),
+                                               next_grid(current_grid){}
 
 /**
  * World::World(width, height)
@@ -75,6 +76,8 @@
  * @param height
  *      The height of the world.
  */
+World::World(const unsigned int width, const unsigned int height) : current_grid(Grid(width, height)),
+                                                                    next_grid(current_grid){}
 
 
 /**
@@ -96,7 +99,8 @@
  * @param initial_state
  *      The state of the constructed world.
  */
-
+World::World(const Grid& initial_state) : current_grid(initial_state),
+                                          next_grid(current_grid){}
 
 /**
  * World::get_width()
@@ -121,7 +125,9 @@
  * @return
  *      The width of the world.
  */
-
+unsigned int World::get_width() const {
+    return current_grid.get_width();
+}
 
 /**
  * World::get_height()
@@ -146,7 +152,9 @@
  * @return
  *      The height of the world.
  */
-
+unsigned int World::get_height() const {
+    return current_grid.get_height();
+}
 
 /**
  * World::get_total_cells()
@@ -171,6 +179,9 @@
  * @return
  *      The number of total cells.
  */
+ unsigned int World::get_total_cells() const {
+     return current_grid.get_total_cells();
+ }
 
 
 /**
@@ -196,7 +207,9 @@
  * @return
  *      The number of alive cells.
  */
-
+unsigned int World::get_alive_cells() const {
+    return current_grid.get_alive_cells();
+}
 
 /**
  * World::get_dead_cells()
@@ -221,6 +234,9 @@
  * @return
  *      The number of dead cells.
  */
+ unsigned int World::get_dead_cells() const {
+     return current_grid.get_dead_cells();
+ }
 
 
 /**
@@ -248,6 +264,9 @@
  *      A reference to the current state.
  */
 
+ const Grid& World::get_state() const {
+     return current_grid;
+ }
 
 /**
  * World::resize(square_size)
@@ -268,6 +287,9 @@
  * @param square_size
  *      The new edge size for both the width and height of the grid.
  */
+ void World::resize(unsigned int new_square_size) {
+     current_grid.resize(new_square_size);
+ }
 
 
 /**
@@ -292,6 +314,9 @@
  * @param new_height
  *      The new height for the grid.
  */
+ void World::resize(unsigned int new_width, unsigned int new_height) {
+     current_grid.resize(new_width, new_height);
+ }
 
 
 /**
@@ -362,3 +387,4 @@
  *      Optional parameter. If true then the step will consider the grid as a torus, where the left edge
  *      wraps to the right edge and the top to the bottom. Defaults to false.
  */
+
