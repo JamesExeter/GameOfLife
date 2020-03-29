@@ -588,6 +588,27 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  * @throws
  *      std::exception or sub-class if the other grid being placed does not fit within the bounds of the current grid.
  */
+ void Grid::merge(const Grid &other, const unsigned int x0, const unsigned int y0, const bool alive_only) {
+     try {
+         std::vector<std::vector<Cell> > other_2D = map_2D(other.cell_grid, other.get_width(), other.get_height());
+
+         //Map elements of other_2D onto the original 1D
+         for (unsigned int i = 0; i < other.get_height(); i++){
+             for (unsigned int j = 0; j < other.get_width(); j++){
+                 if (alive_only){
+                     if (other_2D[i][j] == Cell::ALIVE){
+                         this -> set(j+x0, i+y0, other_2D[i][j]);
+                     }
+                 } else {
+                     this -> set(j+x0, i+y0, other_2D[i][j]);
+                 }
+             }
+         }
+     } catch (const std::out_of_range& oor){
+         std::cerr << "Out of range error thrown, the other grid does not fit within the bounds of the current grid"
+         << oor.what() << std::endl;
+     }
+ }
 
 
 /**
@@ -617,26 +638,40 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
      //Need to check for backwards rotations too,
      //Backwards basically means invert, so 90 = 270 and vice versa
 
-     if (_rotation % 4 == 0){
-         //No rotation
-         return to_rotate;
-     } else if ((_rotation - 1) % 4 == 0){
-         //Rotating 90 degrees
-         /*for (unsigned int i = 0; i < to_rotate.get_height(); i++){
-             for (unsigned int j = 0; j < to_rotate.get_width(); j++){
-
-             }
-         }*/
-
-     } else if ((_rotation - 2) % 4 == 0){
-         //Rotating 180 degrees, simply reverse the vector
-         to_rotate.cell_grid = this -> cell_grid;
-         std::reverse(to_rotate.cell_grid.begin(), to_rotate.cell_grid.end());
-         return to_rotate;
-     } else {
-         //Rotating -90 degrees / 270 degrees
-
+     //Converts negative rotations into the range needed, inverting -90 and -270 multiples
+     if (_rotation < 0){
+         _rotation = abs(_rotation);
+         if ((_rotation -1) % 4 == 0){
+             _rotation = _rotation + 2;
+         } else if ((_rotation - 3) % 4 == 0){
+             _rotation = _rotation - 2;
+         }
      }
+
+     //If rotation is not a multiple of 4
+     if (_rotation % 4 != 0){
+         //If 90 or 270, (also -90 or -270)
+         if (((_rotation - 1) % 4 == 0) || ((_rotation - 3) % 4 == 0)){
+             //Rotating 90 degrees, flip the size of column and row
+             to_rotate.width = this -> height;
+             to_rotate.height = this -> width;
+             for (unsigned int i = 0; i < this -> height; i++){
+                 for (unsigned int j = 0; j < this -> width; j++){
+                     to_rotate.set((this -> height - 1 - i), j,this->operator()(j, i));
+                 }
+             }
+             // If rotating 270, simply rotate another 180 degrees
+             if ((_rotation - 3) % 4 == 0){
+                 std::reverse(to_rotate.cell_grid.begin(), to_rotate.cell_grid.end());
+             }
+         } else if ((_rotation - 2) % 4 == 0){
+             //Rotating 180 degrees, simply reverse the vector
+             std::reverse(to_rotate.cell_grid.begin(), to_rotate.cell_grid.end());
+         }
+     }
+
+     //If rotation is a multiple of 4 or 0, return the original grid
+     return to_rotate;
  }
 
 
