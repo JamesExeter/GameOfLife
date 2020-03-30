@@ -24,7 +24,7 @@ class World {
 private:
     Grid current_grid;
     Grid next_grid;
-    unsigned int count_neighbours(unsigned int x, unsigned int y, bool toroidal);
+    unsigned int count_neighbours(int x, int y, bool toroidal);
 public:
     World();
     explicit World(unsigned int size);
