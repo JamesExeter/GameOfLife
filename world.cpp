@@ -350,6 +350,28 @@ unsigned int World::get_alive_cells() const {
  * @return
  *      Returns the number of alive neighbours.
  */
+ unsigned int World::count_neighbours(unsigned int x, unsigned int y, bool toroidal) {
+     unsigned int count = 0;
+     std::vector<std::vector<Cell> > map2D = current_grid.map_2D(current_grid);
+
+     for (int i = y-1; i < y+1; i++){
+         for (int j = x-1; j < x+1; j++){
+             if (toroidal){
+                 if (map2D[i % current_grid.get_width()][j % current_grid.get_height()] == Cell::ALIVE){
+                     count += 1;
+                 }
+             } else {
+                 if ((0 <= i) && (i < current_grid.get_height()) && ((0 <= j) && (j < current_grid.get_width()))){
+                     if (map2D[i][j] == Cell::ALIVE){
+                         count += 1;
+                     }
+                 }
+             }
+         }
+     }
+
+     return count;
+ }
 
 
 /**

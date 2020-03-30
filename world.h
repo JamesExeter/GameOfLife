@@ -24,13 +24,12 @@ class World {
 private:
     Grid current_grid;
     Grid next_grid;
-
+    unsigned int count_neighbours(unsigned int x, unsigned int y, bool toroidal);
 public:
     World();
     explicit World(unsigned int size);
     World(unsigned int width, unsigned int height);
     explicit World(const Grid& initial_state);
-
     unsigned int get_width() const;
     unsigned int get_height() const;
     unsigned int get_total_cells() const;
@@ -39,5 +38,6 @@ public:
     const Grid& get_state() const;
     void resize(unsigned int new_square_size);
     void resize(unsigned int new_width, unsigned int new_height);
-
+    void step(bool toroidal = false);
+    void advance(unsigned int steps, bool toroidal = false);
 };

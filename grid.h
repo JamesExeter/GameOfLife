@@ -53,7 +53,7 @@ public:
     void resize(unsigned int new_square_size);
     void resize(unsigned int new_width, unsigned int new_height);
 
-    std::vector<std::vector<Cell>> map_2D(const std::vector<Cell> &grid_1D, unsigned int w, unsigned int h) const;
+    std::vector<std::vector<Cell>> map_2D(const Grid& grid_1D) const;
 
     Cell& operator()(unsigned int x, unsigned int y);
     const Cell& operator()(unsigned int x, unsigned int y) const;

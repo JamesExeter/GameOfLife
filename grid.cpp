@@ -263,7 +263,7 @@ void Grid::resize(const unsigned int new_square_size) {
  */
 
  void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
-     std::vector<std::vector<Cell> > map2D = map_2D(cell_grid, width, height);
+     std::vector<std::vector<Cell> > map2D = map_2D(*this);
 
      map2D.resize(new_height);
      for (unsigned int i = 0; i < new_height; i++){
@@ -300,12 +300,12 @@ void Grid::resize(const unsigned int new_square_size) {
   *     The 2D representation of the original cell grid
   */
 
-std::vector<std::vector<Cell> > Grid::map_2D(const std::vector<Cell> &grid_1D, const unsigned int w, const unsigned int h) const {
-    std::vector<std::vector<Cell> > map2D (h, std::vector<Cell>(w, Cell::DEAD));
+std::vector<std::vector<Cell> > Grid::map_2D(const Grid& grid_1D) const {
+    std::vector<std::vector<Cell> > map2D (grid_1D.get_height(), std::vector<Cell>(grid_1D.get_width(), Cell::DEAD));
 
-    for (unsigned int i = 0; i < h; i++){
-        for (unsigned int j = 0; j < w; j++){
-            map2D[i][j] = grid_1D[w*i + j];
+    for (unsigned int i = 0; i < grid_1D.get_height(); i++){
+        for (unsigned int j = 0; j < grid_1D.get_width(); j++){
+            map2D[i][j] = grid_1D.cell_grid[grid_1D.get_width()*i + j];
         }
     }
 
@@ -365,6 +365,7 @@ Cell Grid::get(const unsigned int x, const unsigned int y) const {
         return operator()(x, y);
     } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates " << oor.what() << std::endl;
+        throw std::out_of_range("Cannot recover");
     }
 }
 
@@ -399,6 +400,7 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
         this -> operator()(x, y) = value;
     } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates " << oor.what() << '\n';
+        throw std::out_of_range("Cannot recover");
     }
 }
 
@@ -438,11 +440,16 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  *      std::runtime_error or sub-class if x,y is not a valid coordinate within the grid.
  */
  Cell& Grid::operator()(unsigned int x, unsigned int y) {
-     try {
-         return cell_grid[get_index(x, y)];
-     } catch (const std::out_of_range& oor) {
-         std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
-     }
+    if ((0 <= x && x < get_width()) && (0 <= y && y < get_height())){
+        try {
+            return cell_grid[get_index(x, y)];
+        } catch (const std::out_of_range& oor) {
+            std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate: " << oor.what() << std::endl;
+            throw std::out_of_range("Cannot recover");
+        }
+    } else {
+        throw std::out_of_range("Incorrect values provided");
+    }
  }
 
 /**
@@ -476,10 +483,15 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  *      std::exception or sub-class if x,y is not a valid coordinate within the grid.
  */
 const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
-    try {
-        return cell_grid[get_index(x, y)];
-    } catch (const std::out_of_range& oor) {
-        std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate " << oor.what() << std::endl;
+    if ((0 <= x && x < get_width()) && (0 <= y && y < get_height())){
+        try {
+            return cell_grid[get_index(x, y)];
+        } catch (const std::out_of_range& oor) {
+            std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate: " << oor.what() << std::endl;
+            throw std::out_of_range("Cannot recover");
+        }
+    } else {
+        throw std::out_of_range("Incorrect values provided");
     }
 }
 
@@ -525,7 +537,7 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
 
                  Grid sub_grid((x1-x0), (y1-y0));
 
-                 std::vector<std::vector<Cell> > map2D = map_2D(cell_grid, width, height);
+                 std::vector<std::vector<Cell> > map2D = map_2D(*this);
                  std::vector<std::vector<Cell> > cropped2D;
 
                  for (unsigned int i = y0; i < y1; i++){
@@ -540,19 +552,18 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
 
                  return sub_grid;
              }
-             throw std::out_of_range("One of more values not in range\n");
+             throw std::out_of_range("One of more values not in range");
          }
-         throw std::logic_error("Cropped grid window size is invalid : logical error");
+         throw std::logic_error("Cropped grid window size is invalid");
      }
      catch(const std::out_of_range& oor) {
-         std::cerr << "Out of range error thrown, at least one of (x0, y0), (x1, y1) is not a valid grid coordinate " << oor.what() << std::endl;
+         std::cerr << "Out of range error thrown, at least one of (x0, y0), (x1, y1) is not a valid grid coordinate: " << oor.what() << std::endl;
+         throw std::out_of_range("Cannot recover");
      }
      catch (const std::logic_error& le){
-         std::cerr << "Logic error thrown, the window size is negative " << le.what() << std::endl;
+         std::cerr << "Logic error thrown, the window size is negative: " << le.what() << std::endl;
+         throw std::logic_error("Cannot recover");
      }
-
-    std::cout << "Returning the original grid " << std::endl;
-    return *this;
  }
 
 /**
@@ -594,7 +605,7 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  */
  void Grid::merge(const Grid &other, const unsigned int x0, const unsigned int y0, const bool alive_only) {
      try {
-         std::vector<std::vector<Cell> > other_2D = map_2D(other.cell_grid, other.get_width(), other.get_height());
+         std::vector<std::vector<Cell> > other_2D = map_2D(other);
 
          //Map elements of other_2D onto the original 1D
          for (unsigned int i = 0; i < other.get_height(); i++){
@@ -609,8 +620,9 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
              }
          }
      } catch (const std::out_of_range& oor){
-         std::cerr << "Out of range error thrown, the other grid does not fit within the bounds of the current grid"
+         std::cerr << "Out of range error thrown, the other grid does not fit within the bounds of the current grid: "
          << oor.what() << std::endl;
+         throw std::out_of_range("Cannot recover");
      }
  }
 
