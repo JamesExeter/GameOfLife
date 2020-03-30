@@ -289,6 +289,7 @@ unsigned int World::get_alive_cells() const {
  */
  void World::resize(unsigned int new_square_size) {
      current_grid.resize(new_square_size);
+     next_grid.resize(new_square_size);
  }
 
 
@@ -316,6 +317,7 @@ unsigned int World::get_alive_cells() const {
  */
  void World::resize(unsigned int new_width, unsigned int new_height) {
      current_grid.resize(new_width, new_height);
+     next_grid.resize(new_width, new_height);
  }
 
 
@@ -372,8 +374,7 @@ unsigned int World::get_alive_cells() const {
 
      return count;
  }
-
-
+ 
 /**
  * World::step(toroidal)
  *
