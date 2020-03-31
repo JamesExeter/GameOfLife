@@ -352,20 +352,38 @@ unsigned int World::get_alive_cells() const {
  * @return
  *      Returns the number of alive neighbours.
  */
- unsigned int World::count_neighbours(int x, int y, bool toroidal) {
+ unsigned int World::count_neighbours(unsigned int x, unsigned int y, bool toroidal) {
      unsigned int count = 0;
-     std::vector<std::vector<Cell> > map2D = current_grid.map_2D(current_grid);
+     for (int i = -1; i < 2; i++){
+         for (int j = -1; j < 2; j++){
+             if (!(i == 0 && j == 0)){
+                 if (toroidal){
+                     //Had to add in int and unsigned int conversions to pipe down the wall warnings
+                     //It makes sense to have the width and height as unsigned ints as they can't be negative
+                     //Whereas new_x and new_y could be positive or negative so they have to be ints
+                     int new_x = (int) x+j;
+                     int new_y = (int) y+i;
 
-     for (int i = y-1; i < y+1; i++){
-         for (int j = x-1; j < x+1; j++){
-             if (toroidal){
-                 if (map2D[i % current_grid.get_width()][j % current_grid.get_height()] == Cell::ALIVE){
-                     count += 1;
-                 }
-             } else {
-                 if ((0 <= i) && (i < current_grid.get_height()) && ((0 <= j) && (j < current_grid.get_width()))){
-                     if (map2D[i][j] == Cell::ALIVE){
+                     if (new_x < 0){
+                         new_x = (int) current_grid.get_width() - 1;
+                     } else if ((unsigned) new_x > current_grid.get_width() - 1){
+                         new_x = 0;
+                     }
+
+                     if (new_y < 0){
+                         new_y = (int) current_grid.get_height() - 1;
+                     } else if ((unsigned int) new_y > current_grid.get_height() - 1){
+                         new_y = 0;
+                     }
+
+                     if (current_grid.get(new_x, new_y) == Cell::ALIVE){
                          count += 1;
+                     }
+                 } else {
+                     if ((0 <= x+j) && (x+j < current_grid.get_width()) && ((0 <= y+i) && (y+i < current_grid.get_height()))){
+                         if (current_grid.get(x+j, y+i) == Cell::ALIVE){
+                             count += 1;
+                         }
                      }
                  }
              }
@@ -374,7 +392,7 @@ unsigned int World::get_alive_cells() const {
 
      return count;
  }
- 
+
 /**
  * World::step(toroidal)
  *
@@ -395,6 +413,21 @@ unsigned int World::get_alive_cells() const {
  *      Optional parameter. If true then the step will consider the grid as a torus, where the left edge
  *      wraps to the right edge and the top to the bottom. Defaults to false.
  */
+ void World::step(bool toroidal){
+     for (unsigned int i = 0; i < current_grid.get_height(); i++){
+         for (unsigned int j = 0; j < current_grid.get_width(); j++){
+             unsigned int neighbours = count_neighbours(j, i, toroidal);
+             if ((neighbours <= 1) || (neighbours > 3)){
+                 next_grid.set(j, i, Cell::DEAD);
+             } else if ((neighbours == 3) || ((neighbours == 2) && (current_grid.get(j, i) == Cell::ALIVE))){
+                 next_grid.set(j, i, Cell::ALIVE);
+             }
+         }
+     }
+
+     std::swap(next_grid, current_grid);
+     next_grid = Grid(current_grid.get_width(), current_grid.get_height());
+ }
 
 
 /**
@@ -410,4 +443,8 @@ unsigned int World::get_alive_cells() const {
  *      Optional parameter. If true then the step will consider the grid as a torus, where the left edge
  *      wraps to the right edge and the top to the bottom. Defaults to false.
  */
-
+void World::advance(unsigned int steps, bool toroidal){
+    for (unsigned int i = 0; i < steps; i++){
+        this -> step(toroidal);
+    }
+}
