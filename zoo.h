@@ -23,8 +23,8 @@ namespace Zoo {
     Grid r_pentomino();
     Grid light_weight_spaceship();
 
-    Grid load_ascii(std::string path);
-    void save_ascii(std::string path, const Grid &grid);
+    Grid load_ascii(const std::string& path);
+    void save_ascii(const std::string& path, const Grid &grid);
     Grid load_binary(std::string path);
     void save_binary(std::string path, const Grid &grid);
 

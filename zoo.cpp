@@ -21,6 +21,7 @@
  * @author 953238
  * @date March, 2020
  */
+#include <fstream>
 #include "zoo.h"
 
 // Include the minimal number of headers needed to support your implementation.
@@ -146,8 +147,51 @@ Grid Zoo::light_weight_spaceship() {
  *          - Newline characters are not found when expected during parsing.
  *          - The character for a cell is not the ALIVE or DEAD character.
  */
-Grid Zoo::load_ascii(std::string path) {
+Grid Zoo::load_ascii(const std::string& path) {
+    try {
+        std::ifstream inFile(path);
+        if (inFile.is_open()) {
+            int width;
+            int height;
 
+            inFile >> width >> height;
+            if (width < 0 || height < 0){
+                throw std::runtime_error("The width, height or both are negative which is invalid");
+            }
+
+            Grid out_grid(width, height);
+            for (int i = 0; i < height; i++){
+                for (int j = 0; j < width; j++){
+                    char val = inFile.get();
+                    if (val == '#'){
+                        out_grid.set(j, i, Cell::ALIVE);
+                    } else if (isspace(val)) {
+                            out_grid.set(j, i, Cell::DEAD);
+                    } else {
+                        throw std::runtime_error("Read an element that was incorrect for the grid input");
+                    }
+                }
+
+                if (inFile.peek() == '\n'){
+                    throw std::runtime_error("Newline not encountered when expected, error in file format");
+                } else {
+                    inFile.get();
+                }
+            }
+
+            inFile.close();
+
+            //out_grid = out_grid.crop(1, 0, width, height);
+
+            std::cout << out_grid << std::endl;
+            return out_grid;
+        } else {
+            throw std::runtime_error("File with that name could not be opened");
+        }
+    } catch (const std::ifstream::failure& e){
+        std::cerr << "Exception opening /reading file " << e.what() << std::endl;
+        throw std::runtime_error("Cannot recover");
+    }
 }
 
 /**
@@ -178,8 +222,34 @@ Grid Zoo::load_ascii(std::string path) {
  * @throws
  *      Throws std::runtime_error or sub-class if the file cannot be opened.
  */
- void Zoo::save_ascii(std::string path, const Grid &grid) {
+ void Zoo::save_ascii(const std::string& path, const Grid &grid) {
+     try {
+         std::ofstream outFile(path);
+         if (outFile.is_open()) {
+             unsigned int width = grid.get_width();
+             unsigned int height = grid.get_height();
 
+             outFile << width << ' ' << height << '\n';
+
+             for (unsigned int i = 0; i < height; i++){
+                 for (unsigned int j = 0; j < width; j++){
+                     Cell val = grid.get(j,i);
+                     if (val == Cell::ALIVE){
+                         outFile << '#';
+                     } else if (val == Cell::DEAD){
+                         outFile << ' ';
+                     }
+                 }
+                 outFile << '\n';
+             }
+
+             outFile.close();
+         } else {
+             throw std::runtime_error("File with that name could not be opened");
+         }
+     } catch (const std::ifstream::failure& e){
+         std::cerr << "Exception opening /reading file " << e.what() << std::endl;
+     }
  }
 
 
@@ -206,7 +276,7 @@ Grid Zoo::load_ascii(std::string path) {
  *          - The file ends unexpectedly.
  */
 Grid Zoo::load_binary(std::string path) {
-    
+
 }
 
 /**
