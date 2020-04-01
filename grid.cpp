@@ -263,74 +263,23 @@ void Grid::resize(const unsigned int new_square_size) {
  */
 
  void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
-     std::vector<std::vector<Cell> > map2D = map_2D(*this);
-
-     map2D.resize(new_height);
+     std::vector<Cell> resized;
      for (unsigned int i = 0; i < new_height; i++){
-         map2D[i].resize(new_width, Cell::DEAD);
-     }
-
-     this -> cell_grid.resize(new_width*new_height, Cell::DEAD);
-     this -> width = new_width;
-     this -> height = new_height;
-     this -> total_cells = width * height;
-
-     for (unsigned int i = 0; i < new_height; i++){
-         for (unsigned int j = 0; j < new_width; j++){
-             this -> set(j, i, map2D[i][j]);
-         }
-     }
-
-     /*
-      *  std::vector<Cell> resized;
-         for (unsigned int i = 0; i < new_height; i++){
-             for(unsigned  int j = 0; j < new_width; j++){
-                 if (j < width && i < height){
-                     unsigned int idx = get_index(i, j);
-                     resized.push_back(cell_grid.at(idx));
-                 }
+         for(unsigned  int j = 0; j < new_width; j++){
+             if ((j < width && i < height) && width != 0 && height != 0){
+                 unsigned int idx = get_index(i, j);
+                 resized.push_back(cell_grid.at(idx));
+             } else {
                  resized.push_back(Cell::DEAD);
              }
          }
+     }
 
-        for (auto & i : resized)
-            std::cout << i << ' ';
-
-        std::cout << std::endl;
-
-         cell_grid.swap(resized);
-      */
+     cell_grid.swap(resized);
+     width = new_width;
+     height = new_height;
+     total_cells = width * height;
  }
-
- /**
-  * Grid:map_2D(grid_1D, new_width, new_height)
-  *
-  * Private helper function that converts a 1D vector to a 2D vector of the same dimensions.
-  *
-  * @param grid_1D
-  *     The 1D grid holding the cells of the current grid instance
-  *
-  * @param new_width
-  *     The new width that the grid is to be resized to
-  *
-  * @param new_height
-  *     The new height that the grid is to be resized to
-  *
-  * @return
-  *     The 2D representation of the original cell grid
-  */
-
-std::vector<std::vector<Cell> > Grid::map_2D(const Grid& grid_1D) const {
-    std::vector<std::vector<Cell> > map2D (grid_1D.get_height(), std::vector<Cell>(grid_1D.get_width(), Cell::DEAD));
-
-    for (unsigned int i = 0; i < grid_1D.get_height(); i++){
-        for (unsigned int j = 0; j < grid_1D.get_width(); j++){
-            map2D[i][j] = grid_1D.cell_grid[grid_1D.get_width()*i + j];
-        }
-    }
-
-    return map2D;
-}
 
 /**
  * Grid::get_index(x, y)
@@ -557,18 +506,15 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
 
                  Grid sub_grid((x1-x0), (y1-y0));
 
-                 std::vector<std::vector<Cell> > map2D = map_2D(*this);
-                 std::vector<std::vector<Cell> > cropped2D;
+                 std::vector<Cell> cropped;
 
                  for (unsigned int i = y0; i < y1; i++){
-                     cropped2D.emplace_back(map2D[i].begin() + x0, map2D[i].begin() + x1);
-                 }
-
-                 for (unsigned int i = 0; i < sub_grid.get_height(); i++){
-                     for (unsigned int j = 0; j < sub_grid.get_width(); j++){
-                         sub_grid.set(j, i, cropped2D[i][j]);
+                     for (unsigned int j = x0; j < x1; j++){
+                         cropped.push_back(this -> get(j, i));
                      }
                  }
+
+                 sub_grid.cell_grid.swap(cropped);
 
                  return sub_grid;
              }
@@ -625,17 +571,15 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  */
  void Grid::merge(const Grid &other, const unsigned int x0, const unsigned int y0, const bool alive_only) {
      try {
-         std::vector<std::vector<Cell> > other_2D = map_2D(other);
-
          //Map elements of other_2D onto the original 1D
          for (unsigned int i = 0; i < other.get_height(); i++){
              for (unsigned int j = 0; j < other.get_width(); j++){
                  if (alive_only){
-                     if (other_2D[i][j] == Cell::ALIVE){
-                         this -> set(j+x0, i+y0, other_2D[i][j]);
+                     if (other.get(i, j) == Cell::ALIVE){
+                         this -> set(j+x0, i+y0, other.get(i, j));
                      }
                  } else {
-                     this -> set(j+x0, i+y0, other_2D[i][j]);
+                     this -> set(j+x0, i+y0, other.get(i, j));
                  }
              }
          }

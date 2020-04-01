@@ -146,7 +146,9 @@ Grid Zoo::light_weight_spaceship() {
  *          - Newline characters are not found when expected during parsing.
  *          - The character for a cell is not the ALIVE or DEAD character.
  */
+Grid Zoo::load_ascii(std::string path) {
 
+}
 
 /**
  * Zoo::save_ascii(path, grid)
@@ -176,6 +178,9 @@ Grid Zoo::light_weight_spaceship() {
  * @throws
  *      Throws std::runtime_error or sub-class if the file cannot be opened.
  */
+ void Zoo::save_ascii(std::string path, const Grid &grid) {
+
+ }
 
 
 /**
@@ -200,7 +205,9 @@ Grid Zoo::light_weight_spaceship() {
  *          - The file cannot be opened.
  *          - The file ends unexpectedly.
  */
-
+Grid Zoo::load_binary(std::string path) {
+    
+}
 
 /**
  * Zoo::save_binary(path, grid)
@@ -230,4 +237,6 @@ Grid Zoo::light_weight_spaceship() {
  * @throws
  *      Throws std::runtime_error or sub-class if the file cannot be opened.
  */
+void Zoo::save_binary(std::string path, const Grid &grid) {
 
+}
