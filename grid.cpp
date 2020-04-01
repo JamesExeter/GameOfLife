@@ -383,8 +383,7 @@ unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
 Cell Grid::get(const unsigned int x, const unsigned int y) const {
     try{
         return operator()(x, y);
-    } catch (const std::out_of_range& oor) {++
-    
+    } catch (const std::out_of_range& oor) {
         std::cerr << "Out of Range error for those coordinates " << oor.what() << std::endl;
         throw std::out_of_range("Cannot recover");
     }
