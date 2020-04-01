@@ -280,6 +280,26 @@ void Grid::resize(const unsigned int new_square_size) {
              this -> set(j, i, map2D[i][j]);
          }
      }
+
+     /*
+      *  std::vector<Cell> resized;
+         for (unsigned int i = 0; i < new_height; i++){
+             for(unsigned  int j = 0; j < new_width; j++){
+                 if (j < width && i < height){
+                     unsigned int idx = get_index(i, j);
+                     resized.push_back(cell_grid.at(idx));
+                 }
+                 resized.push_back(Cell::DEAD);
+             }
+         }
+
+        for (auto & i : resized)
+            std::cout << i << ' ';
+
+        std::cout << std::endl;
+
+         cell_grid.swap(resized);
+      */
  }
 
  /**
@@ -363,7 +383,8 @@ unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
 Cell Grid::get(const unsigned int x, const unsigned int y) const {
     try{
         return operator()(x, y);
-    } catch (const std::out_of_range& oor) {
+    } catch (const std::out_of_range& oor) {++
+    
         std::cerr << "Out of Range error for those coordinates " << oor.what() << std::endl;
         throw std::out_of_range("Cannot recover");
     }
