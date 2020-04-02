@@ -180,16 +180,12 @@ Grid Zoo::load_ascii(const std::string& path) {
             }
 
             inFile.close();
-
-            //out_grid = out_grid.crop(1, 0, width, height);
-
-            std::cout << out_grid << std::endl;
             return out_grid;
         } else {
             throw std::runtime_error("File with that name could not be opened");
         }
     } catch (const std::ifstream::failure& e){
-        std::cerr << "Exception opening /reading file " << e.what() << std::endl;
+        std::cerr << "Exception opening / reading file " << e.what() << std::endl;
         throw std::runtime_error("Cannot recover");
     }
 }
@@ -275,8 +271,49 @@ Grid Zoo::load_ascii(const std::string& path) {
  *          - The file cannot be opened.
  *          - The file ends unexpectedly.
  */
-Grid Zoo::load_binary(std::string path) {
+Grid Zoo::load_binary(const std::string &path) {
+    try {
+        std::ifstream inFile(path, std::ios::in | std::ios::binary);
+        if (inFile.is_open()) {
+            unsigned int width;
+            unsigned int height;
+            inFile.read(reinterpret_cast<char *>(&width), sizeof(int));
+            inFile.read(reinterpret_cast<char *>(&height), sizeof(int));
 
+            std::vector<char> buffer(std::istreambuf_iterator<char>(inFile), {});
+            std::vector<Cell> cells;
+
+            Grid out_grid(width, height);
+
+            for (auto const& value: buffer){
+                for (unsigned int i = 0; i < 8; i++){
+                    if (((value >> i) & 1) == 0){
+                        cells.push_back(Cell::DEAD);
+                    } else {
+                        cells.push_back(Cell::ALIVE);
+                    }
+                }
+            }
+
+            if (cells.size() < (width * height)){
+                throw std::runtime_error("Unexpected end to binary file, please check input");
+            }
+
+            for (unsigned int i = 0; i < height; i++){
+                for (unsigned int j = 0; j < width; j++){
+                    out_grid.set(j, i, cells.at(i*width + j));
+                }
+            }
+
+            inFile.close();
+            return out_grid;
+        } else {
+            throw std::runtime_error("File with that name could not be opened");
+        }
+    } catch (const std::ifstream::failure& e){
+        std::cerr << "Exception opening / reading file " << e.what() << std::endl;
+        throw std::runtime_error("Cannot recover");
+    }
 }
 
 /**
@@ -307,6 +344,50 @@ Grid Zoo::load_binary(std::string path) {
  * @throws
  *      Throws std::runtime_error or sub-class if the file cannot be opened.
  */
-void Zoo::save_binary(std::string path, const Grid &grid) {
+void Zoo::save_binary(const std::string& path, const Grid &grid) {
+    try {
+        std::ofstream outFile(path, std::ios::out | std::ios::binary);
+        if (outFile.is_open()) {
+            unsigned int width = grid.get_width();
+            unsigned int height = grid.get_height();
 
+            outFile.write( reinterpret_cast<const char *>(&width), sizeof(width));
+            outFile.write( reinterpret_cast<const char *>(&height), sizeof(height));
+
+            int current_bit = 0;
+            unsigned char bit_buffer = 0;
+
+            for (unsigned int i = 0; i < height; i++){
+                for (unsigned int j = 0; j < width; j++){
+                    if (grid.get(j, i) == Cell::ALIVE){
+                        bit_buffer |= (1<<current_bit);
+                    } else {
+                        bit_buffer |= (0<<current_bit);
+                    }
+                    current_bit++;
+                    if (current_bit == 8){
+                        outFile.write(reinterpret_cast<const char *>(&bit_buffer), sizeof(bit_buffer));
+                        current_bit = 0;
+                        bit_buffer = 0;
+                    }
+                }
+            }
+
+            while(current_bit){
+                bit_buffer |= (0<<current_bit);
+                current_bit++;
+                if (current_bit == 8){
+                    outFile.write(reinterpret_cast<const char *>(&bit_buffer), sizeof(bit_buffer));
+                    current_bit = 0;
+                    bit_buffer = 0;
+                }
+            }
+
+            outFile.close();
+        } else {
+            throw std::runtime_error("File with that name could not be opened");
+        }
+    } catch (const std::ifstream::failure& e){
+        std::cerr << "Exception opening /reading file " << e.what() << std::endl;
+    }
 }
