@@ -58,6 +58,7 @@ Grid::Grid() : width(0), height(0), total_cells(0), cell_grid(std::vector<Cell>(
  *      The edge size to use for the width and height of the grid.
  */
 
+//Initialise all of the cells to be dead
 Grid::Grid(const unsigned int square_size) : width(square_size),
                                              height(square_size),
                                              total_cells(square_size*square_size),
@@ -79,6 +80,7 @@ Grid::Grid(const unsigned int square_size) : width(square_size),
  * @param height
  *      The height of the grid.
  */
+ //Initialise all of the cells to be dead
 Grid::Grid(const unsigned int width, const unsigned int height) : width(width),
                                                                   height(height),
                                                                   total_cells(width * height),
@@ -189,6 +191,7 @@ unsigned int Grid::get_total_cells() const {
  *      The number of alive cells.
  */
 unsigned int Grid::get_alive_cells() const {
+    //Call std::cout on the cell vector, incrementing each time it finds an instance of Cell::ALIVE
     unsigned int alive_count = std::count( this->cell_grid.begin(), this->cell_grid.end(), Cell::ALIVE);
     return alive_count;
 }
@@ -217,6 +220,7 @@ unsigned int Grid::get_alive_cells() const {
  *      The number of dead cells.
  */
 unsigned int Grid::get_dead_cells() const {
+    //The number of dead cells is simply the total number of cells minus the alive cells
     return total_cells - get_alive_cells();
 }
 
@@ -238,6 +242,7 @@ unsigned int Grid::get_dead_cells() const {
  *      The new edge size for both the width and height of the grid.
  */
 void Grid::resize(const unsigned int new_square_size) {
+    //Call the other resize function with the width and height the dimensions of new_square_size
     Grid::resize(new_square_size, new_square_size);
 }
 
@@ -264,18 +269,27 @@ void Grid::resize(const unsigned int new_square_size) {
 
  void Grid::resize(const unsigned int new_width, unsigned int const new_height) {
      std::vector<Cell> resized;
+     //For each cell in the original grid
      for (unsigned int i = 0; i < new_height; i++){
          for(unsigned  int j = 0; j < new_width; j++){
+             //Ensures that we only attempt to index within the dimensions of the current grid
              if ((j < width && i < height) && width != 0 && height != 0){
+                 //Index the grid at the current location
                  unsigned int idx = get_index(i, j);
+                 //Add that cell to the new resized grid, since the new grid isn't initialised, we can just push back
+                 //values onto it
                  resized.push_back(cell_grid.at(idx));
              } else {
+                 //If either the new width or height is greater than the current, add on dead cells
                  resized.push_back(Cell::DEAD);
              }
          }
      }
 
+     //The resized grid is now correct and complete, we can now swap it out with the current grid
      cell_grid.swap(resized);
+
+     //Update all other member variables of the grid
      width = new_width;
      height = new_height;
      total_cells = width * height;
@@ -298,6 +312,7 @@ void Grid::resize(const unsigned int new_square_size) {
  *      The 1d offset from the start of the data array where the desired cell is located.
  */
 unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
+    //Converts a 2D coordinate to a 1D coordinate, travel across the width y times then add the current x
     return x + (width * y);
 }
 
@@ -330,6 +345,7 @@ unsigned int Grid::get_index(const unsigned int x, const unsigned int y) const {
  *      std::exception or sub-class if x,y is not a valid coordinate within the grid.
  */
 Cell Grid::get(const unsigned int x, const unsigned int y) const {
+    //Try to return the value of the cell at x, y using operator(), or throw an exception
     try{
         return operator()(x, y);
     } catch (const std::out_of_range& oor) {
@@ -365,6 +381,7 @@ Cell Grid::get(const unsigned int x, const unsigned int y) const {
  *      std::exception or sub-class if x,y is not a valid coordinate within the grid.
  */
 void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
+    //Try to update the value of a cell at /(x,y) using operator() or throw an exception for being out of bounds
     try {
         this -> operator()(x, y) = value;
     } catch (const std::out_of_range& oor) {
@@ -409,10 +426,13 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  *      std::runtime_error or sub-class if x,y is not a valid coordinate within the grid.
  */
  Cell& Grid::operator()(unsigned int x, unsigned int y) {
+    //Checks that the coordinates are valid
     if ((0 <= x && x < get_width()) && (0 <= y && y < get_height())){
         try {
+            //Get the modifiable reference of the cell at x, y using get_index
             return cell_grid[get_index(x, y)];
         } catch (const std::out_of_range& oor) {
+            //Handle the errors and prevent them for moving up the function call chain
             std::cerr << "Out of range error thrown, (x, y) is not a valid grid coordinate: " << oor.what() << std::endl;
             throw std::out_of_range("Cannot recover");
         }
@@ -451,6 +471,8 @@ void Grid::set(const unsigned int x, const unsigned int y, const Cell value){
  * @throws
  *      std::exception or sub-class if x,y is not a valid coordinate within the grid.
  */
+
+//Same at the operator() above but provides a non-modifiable reference
 const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
     if ((0 <= x && x < get_width()) && (0 <= y && y < get_height())){
         try {
@@ -499,23 +521,32 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      or if the crop window has a negative size.
  */
  Grid Grid::crop(const unsigned int x0, const unsigned int y0, const unsigned int x1, const unsigned int y1) const {
+     //Errors fairly self explanatory
      try {
          if ((x0 <= x1) && (y0 <= y1)){
+             //If the window size is valid
              if ((0 <= x0 && x0 <= width) && (x0 <= x1 && x1 <= width) &&
                  (0 <= y0 && y0 <= height) && (y0 <= y1 && y1 <= height)){
+                 //If the coordinates are all valid
 
+                 //Create a new grid with the cropped dimensions
                  Grid sub_grid((x1-x0), (y1-y0));
 
+                 //Create a buffer vector that can be swapped with
                  std::vector<Cell> cropped;
 
                  for (unsigned int i = y0; i < y1; i++){
                      for (unsigned int j = x0; j < x1; j++){
+                         //For each value in the cropped area of the original grid, add it to the buffer vector
+                         //Get the cell by using the get method which converts a 2d coordinate to a 1d index
                          cropped.push_back(this -> get(j, i));
                      }
                  }
 
+                 //Swap the buffer with the grid of the new cropped grid
                  sub_grid.cell_grid.swap(cropped);
 
+                 //Return the cropped grid whilst not modifying the original grid
                  return sub_grid;
              }
              throw std::out_of_range("One of more values not in range");
@@ -570,15 +601,23 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      std::exception or sub-class if the other grid being placed does not fit within the bounds of the current grid.
  */
  void Grid::merge(const Grid &other, const unsigned int x0, const unsigned int y0, const bool alive_only) {
+     //Error handing fairly self explanatory
      try {
-         //Map elements of other_2D onto the original 1D
+         //Iterate other the provided grid parameter
          for (unsigned int i = 0; i < other.get_height(); i++){
              for (unsigned int j = 0; j < other.get_width(); j++){
+                 //If only updating when alive
                  if (alive_only){
+                     //If the cell of the provided grid at the current index is alive, then we overwrite the current grid
+                     //at that location with respect to where the other grid is placed on the current grid
                      if (other.get(i, j) == Cell::ALIVE){
                          this -> set(j+x0, i+y0, other.get(i, j));
                      }
                  } else {
+                     //When overwriting all values
+                     //Set the value of the current to that of the provided grid at the current index
+                     //Need to add x0 and y0 into the indexing such that we have respect to the location the other grid
+                     //is placed onto the current grid... confusing explanation I know
                      this -> set(j+x0, i+y0, other.get(i, j));
                  }
              }
@@ -614,11 +653,14 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  *      Returns a copy of the grid that has been rotated.
  */
  Grid Grid::rotate(int _rotation) const {
+     //Create a copy of the current grid that is to be rotated
      Grid to_rotate = *this;
+
      //Need to check for backwards rotations too,
      //Backwards basically means invert, so 90 = 270 and vice versa
 
      //Converts negative rotations into the range needed, inverting -90 and -270 multiples
+     //Inverts 90 and 270 since a -90 rotation is a 270 and a -270 is a 90 rotation
      if (_rotation < 0){
          _rotation = abs(_rotation);
          if ((_rotation -1) % 4 == 0){
@@ -690,23 +732,37 @@ const Cell& Grid::operator()(unsigned int x, unsigned int y) const {
  * @return
  *      Returns a reference to the output stream to enable operator chaining.
  */
+
+//Oh boy this was like doing some hackerrank stuff
 std::ostream& operator<<(std::ostream& os, const Grid &grid){
+    //Image we have a 1 cell border around our current grid, this increases the width and height by 2
     for(unsigned int  i=0; i< grid.get_height()+2; i++) {
         for (unsigned int j = 0; j < grid.get_width() + 2; j++) {
+            //If we are at the vertical border
             if ((i == 0) || i == grid.get_height() + 1) {
+                //If we are at the left horizontal border, then top left + is placed
                 if (j == 0) {
                     os << "+";
                 } else if (j == grid.get_width() + 1) {
+                    //Else if we are at the right horizontal border, the top right + is placed with a newline
                     os << "+" << std::endl;
                 } else {
+                    //We are at the vertical border but not a corner so place a -
                     os << "-";
                 }
+            //Not at the vertical border
             } else {
+                //If at the left horizontal border
                 if (j == 0){
+                    //Place |
                     os << "|";
+                //If at right horizontal border
                 } else if (j == grid.get_width() + 1){
+                    //Place | with new line
                     os << "|" << std::endl;
                 } else {
+                    //Not on the border of the grid so we can just place the cell value, outputting ' ' or  '#'
+                    //given the cell value
                     if (grid.operator()(j - 1, i - 1) == Cell::ALIVE){
                         os << "#";
                     } else {
@@ -717,6 +773,7 @@ std::ostream& operator<<(std::ostream& os, const Grid &grid){
         }
     }
 
+    //Return the finished stream output
     return os;
 }
 

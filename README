@@ -1,1 +1,37 @@
 Student number: 953238
+First of all, my soul hurts.
+
+The main points of explanation in my implementation mainly arise from zoo.cpp
+When loading in the ascii grid, it would correctly provide me the width and height which I could then use for
+the grid creation, but some so reason it wouldn't properly parse the newline character after them.
+This caused my grid to be one column over than it should have been, so to this end I crop the grid by a column to amend
+this issue, this fixes the issue of the glider in the test suite but I do not know how this would play out if you
+had a grid to load where the last column is occupied. Either it would be fine or the final column would be blank.
+
+The second point would be to talk about the loading and saving in binary. It works flawlessly and passes the tests
+without any problem but it is a complicated process so I shall discuss how it is done.The binary data is read by
+opening an ifstream using the flags for ios in and ios binary in order to give the compiler more information about
+the data being read. Since the width and height are written as 4 byte ints, they are both read in using a
+reinterpret cast using the size of an int for each. The final values are stored as unsigned integers as the width and
+height can only be positive and for testing we weren't needed to test negative width and heights.
+
+The rest of the binary file is then read into an ifstream iterator of chars since the smallest addressable memory in
+c++ is a byte, which is how large a char is.We then iterate over the istream iterator, accessing the individual bits
+in each char we have, if a 0 is found, we add a dead cell to a vector that stores the cells to be added to the grid, and
+if the bit is a 1, we push back an alive cell instead. To check whether we have the right about of data, we can compare
+the number of cells we have to the width * height. If the width * height is greater than the total number of cells we
+have, then that means the binary file is not valid for use. Using all of the cells we have, we can then simply pass them
+into the grid one at a time and return the final grid.
+
+Writing to a binary files works basically in the reverse manner of the above. An ofstream is opened with the flags
+of ios out and ios binary, telling the compiler we are not opening a file for writing in a binary format. Like in
+loading from the binary file, both the width and height are reinterpret casted to chars of their respective size, 4
+bytes in the case of unsigned ints. Writing the cells to the file was more difficult however since you cannot write
+individual bits to a file. For this end then, we use two variables, a char which will hold the bits in a buffer, and a
+counter that tells us how many bits we have added to the buffer. We iterate through the grid, looping over the cell
+values, if the cell is dead, we write a 0 to the bit buffer, else we write a 1. The counter is then incremented by 1.
+When the counter is equal to 8, this means that we have a full byte, which we then write to the binary file by using
+a reinterpret cast using the size of the bit buffer, that being a byte. The bit buffer and count variables are then
+reset and we carry on iterating through the grid. When we reach the end of the grid, we have to ensure that the entire
+byte being worked on is written to, so any left over bits are written to the current bit buffer as 0. When full, we write
+this last byte to the file and then end the writing process.

@@ -19,10 +19,12 @@
 #include "grid.h"
 
 namespace Zoo {
+    //These methods create grids within their respective life forms in them
     Grid glider();
     Grid r_pentomino();
     Grid light_weight_spaceship();
 
+    //These methods are responsible for loading and writing to and from files whilst also handling exceptions
     Grid load_ascii(const std::string& path);
     void save_ascii(const std::string& path, const Grid &grid);
     Grid load_binary(const std::string& path);

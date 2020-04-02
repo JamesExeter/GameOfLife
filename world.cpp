@@ -23,9 +23,6 @@
  */
 #include "world.h"
 
-// Include the minimal number of headers needed to support your implementation.
-// #include ...
-
 /**
  * World::World()
  *
@@ -288,6 +285,7 @@ unsigned int World::get_alive_cells() const {
  *      The new edge size for both the width and height of the grid.
  */
  void World::resize(unsigned int new_square_size) {
+     //Resize both the current and next grid
      current_grid.resize(new_square_size);
      next_grid.resize(new_square_size);
  }
@@ -316,6 +314,8 @@ unsigned int World::get_alive_cells() const {
  *      The new height for the grid.
  */
  void World::resize(unsigned int new_width, unsigned int new_height) {
+     //Resize both the current and next grid, could perform a swap action here to possibly save processing time but
+     //this works
      current_grid.resize(new_width, new_height);
      next_grid.resize(new_width, new_height);
  }
@@ -353,34 +353,48 @@ unsigned int World::get_alive_cells() const {
  *      Returns the number of alive neighbours.
  */
  unsigned int World::count_neighbours(unsigned int x, unsigned int y, bool toroidal) {
+     //Count initially 0
      unsigned int count = 0;
+     //For a given cell, consider all of the cells adjacent to it
      for (int i = -1; i < 2; i++){
          for (int j = -1; j < 2; j++){
+             //Do not check the cell itself
              if (!(i == 0 && j == 0)){
                  if (toroidal){
+                     //If the grid wraps around...
+
                      //Had to add in int and unsigned int conversions to pipe down the wall warnings
                      //It makes sense to have the width and height as unsigned ints as they can't be negative
                      //Whereas new_x and new_y could be positive or negative so they have to be ints
+
+                     //new_x and new_y are the coordinates of the neighbour being checked
                      int new_x = (int) x+j;
                      int new_y = (int) y+i;
 
+                     //Checks if the neighbour is outside of the grid, if so, since toroidal, wrap around to the
+                     //other side
                      if (new_x < 0){
                          new_x = (int) current_grid.get_width() - 1;
                      } else if ((unsigned) new_x > current_grid.get_width() - 1){
                          new_x = 0;
                      }
 
+                     //Do same for y as was done for x
                      if (new_y < 0){
                          new_y = (int) current_grid.get_height() - 1;
                      } else if ((unsigned int) new_y > current_grid.get_height() - 1){
                          new_y = 0;
                      }
 
+                     //If the neighbouring cell is alive, increment the count
                      if (current_grid.get(new_x, new_y) == Cell::ALIVE){
                          count += 1;
                      }
                  } else {
+                     //If the grid doesn't wrap around
+                     //As long as the adjacent cell if within the bounds of the grid...
                      if ((0 <= x+j) && (x+j < current_grid.get_width()) && ((0 <= y+i) && (y+i < current_grid.get_height()))){
+                         //If that neighbour is alive, increment the count
                          if (current_grid.get(x+j, y+i) == Cell::ALIVE){
                              count += 1;
                          }
@@ -390,6 +404,7 @@ unsigned int World::get_alive_cells() const {
          }
      }
 
+     //All neighbours checked, return the count
      return count;
  }
 
@@ -414,12 +429,17 @@ unsigned int World::get_alive_cells() const {
  *      wraps to the right edge and the top to the bottom. Defaults to false.
  */
  void World::step(bool toroidal){
+     //For each cell in the current grid
      for (unsigned int i = 0; i < current_grid.get_height(); i++){
          for (unsigned int j = 0; j < current_grid.get_width(); j++){
+             //For the current cell, count the number of neighbours it has, whether it is toroidal or not
              unsigned int neighbours = count_neighbours(j, i, toroidal);
+             //If statement for the neighbours result
              if ((neighbours <= 1) || (neighbours > 3)){
+                 //Dead if 0,1 or 3+ alive neighbours
                  next_grid.set(j, i, Cell::DEAD);
              } else if ((neighbours == 3) || ((neighbours == 2) && (current_grid.get(j, i) == Cell::ALIVE))){
+                 //Alive if either 3 neighbours alive or if the cell is currently alive and has 3 neighbours
                  next_grid.set(j, i, Cell::ALIVE);
              }
          }
@@ -444,6 +464,7 @@ unsigned int World::get_alive_cells() const {
  *      wraps to the right edge and the top to the bottom. Defaults to false.
  */
 void World::advance(unsigned int steps, bool toroidal){
+    //Perform the step method steps number of times
     for (unsigned int i = 0; i < steps; i++){
         this -> step(toroidal);
     }
